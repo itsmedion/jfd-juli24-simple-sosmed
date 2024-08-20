@@ -30,11 +30,13 @@ module.exports =
         if (user.length > 0) {
             let passwordCocok = bcrypt.compareSync(password,user[0].password)
             if (passwordCocok) {
+                // set data session user yg login
+                req.session.user = user
                 // arahkan ke halaman_feed
                 res.redirect('/feed')
             } else {
                 let message ='Password Salah,coba ingat-ingat!!'
-                res.redirect(`/login?msg=$msg`)
+                res.redirect(`/login?msg=${message}`)
             }
         } else {
             let message = 'User tidak terdaftar,silahkan register!'
