@@ -1,6 +1,7 @@
+const bcrypt    = require('bcryptjs')
 const mysql     = require('mysql2')
-const db = require('../config/database').db
-const eksekusi = require('../config/database').eksekusi
+const db        = require('../config/database').db
+const eksekusi  = require('../config/database').eksekusi
 
 let cari_username = function (username) {
     return eksekusi(mysql.format(
@@ -13,20 +14,31 @@ let cari_username = function (username) {
 module.exports =
 {
     form_login: function(req,res) {
-        res.render('auth/form-login')
+        let dataview = {
+            message: req.query.msg
+        }
+        res.render('auth/form-login',dataview)
     },
 
 
-proses_login: async function (req,res) {
-    let username = req.body.form_username
-    let password = req.body.form_password
+    proses_login: async function (req,res) {
+        let username = req.body.form_username
+        let password = req.body.form_password
+        let user     = await cari_username(username)
 
-    let user = await cari_username(username)
-    console.log(user)
-    if (user.length > 0) {
-        res.end('user ada di database')
-    } else {
-        res.end('Gak ada !!')
-    }
+
+        if (user.length > 0) {
+            let passwordCocok = bcrypt.compareSync(password,user[0].password)
+            if (passwordCocok) {
+                // arahkan ke halaman_feed
+                res.redirect('/feed')
+            } else {
+                let message ='Password Salah,coba ingat-ingat!!'
+                res.redirect(`/login?msg=$msg`)
+            }
+        } else {
+            let message = 'User tidak terdaftar,silahkan register!'
+            res.redirect(`/login?msg=${message}`)
+        }
     }
 }
