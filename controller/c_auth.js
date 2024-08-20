@@ -14,11 +14,15 @@ let cari_username = function (username) {
 module.exports =
 {
     form_login: function(req,res) {
+        if (req.session.user) {
+            res.redirect('/feed')
+        } else {
         let dataview = {
             message: req.query.msg
         }
         res.render('auth/form-login',dataview)
-    },
+    }
+},
 
 
     proses_login: async function (req,res) {
@@ -42,5 +46,16 @@ module.exports =
             let message = 'User tidak terdaftar,silahkan register!'
             res.redirect(`/login?msg=${message}`)
         }
-    }
+    },
+
+
+cek_login: function(req,res,next) {
+if(req.session.user){
+    next()
+} else {
+    let message = 'Sesi anda habis, silahkan login ulang.'
+    res.redirect(`/login?msg=${message}`)
+}
+}
+
 }
